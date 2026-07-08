@@ -1,4 +1,3 @@
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:example/main.dart';
 
@@ -7,7 +6,7 @@ void main() {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const IndustrialDrawingApp());
 
-    // Verify that the Industrial Drawing title is present.
-    expect(find.text('Industrial Drawing'), findsOneWidget);
+    expect(find.text('256 x 256 Pixel Canvas'), findsOneWidget);
+    expect(find.byType(PixelPaintExampleScreen), findsOneWidget);
   });
 }

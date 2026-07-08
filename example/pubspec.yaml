@@ -38,12 +38,6 @@ dependencies:
   industrial_drawing_flutter:
     path: ../
 
-  flutter_colorpicker: ^1.1.0
-  google_fonts: ^8.1.0
-  icons_plus: ^5.0.0
-  path_provider: ^2.1.5
-  share_plus: ^13.1.0
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
