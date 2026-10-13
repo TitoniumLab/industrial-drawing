@@ -43,6 +43,7 @@ export 'src/helpers/snap_helpers.dart';
 
 // Painter
 export 'src/painters/drawing_painter.dart';
+export 'src/pixel_canvas/pixel_canvas.dart';
 
 // Widgets
 export 'src/widgets/canvas.dart';

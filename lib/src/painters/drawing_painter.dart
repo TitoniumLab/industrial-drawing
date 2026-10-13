@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
-import 'package:icons_plus/icons_plus.dart';
 import '../controllers/drawing_controller.dart';
 import '../models/drawn_shape.dart';
 import '../models/enums.dart';
@@ -68,7 +67,10 @@ class DrawingPainter extends CustomPainter {
   });
 
   /// Creates a painter directly from a [DrawingController].
-  factory DrawingPainter.fromController(DrawingController c, {bool showGrid = true}) {
+  factory DrawingPainter.fromController(
+    DrawingController c, {
+    bool showGrid = true,
+  }) {
     return DrawingPainter(
       c.drawnShapes,
       c.startPoint,
@@ -108,7 +110,10 @@ class DrawingPainter extends CustomPainter {
     canvas.translate(-center.dx, -center.dy);
 
     // Background
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), Paint()..color = Colors.white);
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      Paint()..color = Colors.white,
+    );
 
     if (showGrid) _drawGrid(canvas, size);
 
@@ -121,12 +126,28 @@ class DrawingPainter extends CustomPainter {
     }
 
     // Preview shape while drawing
-    if (isDrawing && start != null && end != null && currentTool == Tool.draw && currentShape != ShapeType.freehand) {
-      _drawShape(canvas, DrawnShape(start!, end!, currentShape, color: color.withValues(alpha: 0.5), strokeWidth: strokeWidth, mode: mode));
+    if (isDrawing &&
+        start != null &&
+        end != null &&
+        currentTool == Tool.draw &&
+        currentShape != ShapeType.freehand) {
+      _drawShape(
+        canvas,
+        DrawnShape(
+          start!,
+          end!,
+          currentShape,
+          color: color.withValues(alpha: 0.5),
+          strokeWidth: strokeWidth,
+          mode: mode,
+        ),
+      );
     }
 
     // Measurement line
-    if (currentTool == Tool.measure && measurementStart != null && measurementEnd != null) {
+    if (currentTool == Tool.measure &&
+        measurementStart != null &&
+        measurementEnd != null) {
       _drawMeasurementLine(canvas);
     }
 
@@ -152,7 +173,9 @@ class DrawingPainter extends CustomPainter {
   }
 
   void _drawGrid(Canvas canvas, Size size) {
-    final gridPaint = Paint()..color = Colors.grey.shade300..strokeWidth = 0.5;
+    final gridPaint = Paint()
+      ..color = Colors.grey.shade300
+      ..strokeWidth = 0.5;
     const double gridSize = 20.0;
     for (double i = 0; i < size.width; i += gridSize) {
       canvas.drawLine(Offset(i, 0), Offset(i, size.height), gridPaint);
@@ -166,7 +189,9 @@ class DrawingPainter extends CustomPainter {
     final paint = Paint()
       ..color = s.color.withValues(alpha: s.opacity)
       ..strokeWidth = s.strokeWidth
-      ..style = s.mode == DrawMode.fill ? PaintingStyle.fill : PaintingStyle.stroke
+      ..style = s.mode == DrawMode.fill
+          ? PaintingStyle.fill
+          : PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
 
@@ -188,11 +213,19 @@ class DrawingPainter extends CustomPainter {
         canvas.drawCircle(rect.center, rect.shortestSide / 2, paint);
         break;
       case ShapeType.triangle:
-        canvas.drawPath(Path()..moveTo(s.start.dx, s.end.dy)..lineTo(s.end.dx, s.end.dy)..lineTo((s.start.dx + s.end.dx) / 2, s.start.dy)..close(), paint);
+        canvas.drawPath(
+          Path()
+            ..moveTo(s.start.dx, s.end.dy)
+            ..lineTo(s.end.dx, s.end.dy)
+            ..lineTo((s.start.dx + s.end.dx) / 2, s.start.dy)
+            ..close(),
+          paint,
+        );
         break;
       case ShapeType.freehand:
         if (s.pathPoints != null && s.pathPoints!.length > 1) {
-          final path = Path()..moveTo(s.pathPoints!.first.dx, s.pathPoints!.first.dy);
+          final path = Path()
+            ..moveTo(s.pathPoints!.first.dx, s.pathPoints!.first.dy);
           for (var i = 1; i < s.pathPoints!.length; i++) {
             path.lineTo(s.pathPoints![i].dx, s.pathPoints![i].dy);
           }
@@ -216,7 +249,10 @@ class DrawingPainter extends CustomPainter {
           ..moveTo(s.start.dx, s.start.dy)
           ..lineTo(s.end.dx, s.start.dy)
           ..lineTo(s.end.dx, s.start.dy + (s.end.dy - s.start.dy) * 0.3)
-          ..lineTo(s.start.dx + (s.end.dx - s.start.dx) * 0.3, s.start.dy + (s.end.dy - s.start.dy) * 0.3)
+          ..lineTo(
+            s.start.dx + (s.end.dx - s.start.dx) * 0.3,
+            s.start.dy + (s.end.dy - s.start.dy) * 0.3,
+          )
           ..lineTo(s.start.dx + (s.end.dx - s.start.dx) * 0.3, s.end.dy)
           ..lineTo(s.start.dx, s.end.dy)
           ..close();
@@ -255,7 +291,10 @@ class DrawingPainter extends CustomPainter {
       case ShapeType.boxShape:
         final outer = Rect.fromPoints(s.start, s.end);
         final thickness = (s.end.dx - s.start.dx).abs() * 0.2;
-        final path = Path()..addRect(outer)..addRect(outer.deflate(thickness))..fillType = PathFillType.evenOdd;
+        final path = Path()
+          ..addRect(outer)
+          ..addRect(outer.deflate(thickness))
+          ..fillType = PathFillType.evenOdd;
         canvas.drawPath(path, paint);
         break;
       case ShapeType.rake:
@@ -269,9 +308,15 @@ class DrawingPainter extends CustomPainter {
         }
         break;
       case ShapeType.warp:
-        if (s.pathPoints != null && (s.pathPoints!.length == 4 || s.pathPoints!.length == 8)) {
+        if (s.pathPoints != null &&
+            (s.pathPoints!.length == 4 || s.pathPoints!.length == 8)) {
           final corners = s.pathPoints!.length == 8
-              ? [s.pathPoints![0], s.pathPoints![2], s.pathPoints![4], s.pathPoints![6]]
+              ? [
+                  s.pathPoints![0],
+                  s.pathPoints![2],
+                  s.pathPoints![4],
+                  s.pathPoints![6],
+                ]
               : s.pathPoints!;
           final path = Path()
             ..moveTo(corners[0].dx, corners[0].dy)
@@ -284,7 +329,15 @@ class DrawingPainter extends CustomPainter {
         break;
       case ShapeType.text:
         s.texts.forEach((key, label) {
-          _drawText(canvas, s.textPositions[key] ?? s.start, label, s.color, s.fontSize, s.fontStyle, s.fontWeight);
+          _drawText(
+            canvas,
+            s.textPositions[key] ?? s.start,
+            label,
+            s.color,
+            s.fontSize,
+            s.fontStyle,
+            s.fontWeight,
+          );
         });
         break;
     }
@@ -292,7 +345,15 @@ class DrawingPainter extends CustomPainter {
     // Attached text labels (non-text shapes)
     if (s.type != ShapeType.text && s.texts.isNotEmpty) {
       s.texts.forEach((key, label) {
-        _drawText(canvas, s.textPositions[key] ?? s.start, label, s.color, s.fontSize, s.fontStyle, s.fontWeight);
+        _drawText(
+          canvas,
+          s.textPositions[key] ?? s.start,
+          label,
+          s.color,
+          s.fontSize,
+          s.fontStyle,
+          s.fontWeight,
+        );
       });
     }
 
@@ -305,10 +366,25 @@ class DrawingPainter extends CustomPainter {
     final angle = math.atan2(s.end.dy - s.start.dy, s.end.dx - s.start.dx);
     const headLength = 16.0;
     const headAngle = 0.5;
-    final p1 = Offset(s.end.dx - headLength * math.cos(angle - headAngle), s.end.dy - headLength * math.sin(angle - headAngle));
-    final p2 = Offset(s.end.dx - headLength * math.cos(angle + headAngle), s.end.dy - headLength * math.sin(angle + headAngle));
-    final headPaint = Paint()..color = paint.color..style = PaintingStyle.fill;
-    canvas.drawPath(Path()..moveTo(s.end.dx, s.end.dy)..lineTo(p1.dx, p1.dy)..lineTo(p2.dx, p2.dy)..close(), headPaint);
+    final p1 = Offset(
+      s.end.dx - headLength * math.cos(angle - headAngle),
+      s.end.dy - headLength * math.sin(angle - headAngle),
+    );
+    final p2 = Offset(
+      s.end.dx - headLength * math.cos(angle + headAngle),
+      s.end.dy - headLength * math.sin(angle + headAngle),
+    );
+    final headPaint = Paint()
+      ..color = paint.color
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(
+      Path()
+        ..moveTo(s.end.dx, s.end.dy)
+        ..lineTo(p1.dx, p1.dy)
+        ..lineTo(p2.dx, p2.dy)
+        ..close(),
+      headPaint,
+    );
   }
 
   void _drawStar(Canvas canvas, DrawnShape s, Paint paint) {
@@ -364,13 +440,32 @@ class DrawingPainter extends CustomPainter {
     final tickDx = tickLen * math.cos(perp);
     final tickDy = tickLen * math.sin(perp);
 
-    canvas.drawLine(Offset(s.start.dx + tickDx, s.start.dy + tickDy), Offset(s.start.dx - tickDx, s.start.dy - tickDy), paint);
-    canvas.drawLine(Offset(s.end.dx + tickDx, s.end.dy + tickDy), Offset(s.end.dx - tickDx, s.end.dy - tickDy), paint);
+    canvas.drawLine(
+      Offset(s.start.dx + tickDx, s.start.dy + tickDy),
+      Offset(s.start.dx - tickDx, s.start.dy - tickDy),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(s.end.dx + tickDx, s.end.dy + tickDy),
+      Offset(s.end.dx - tickDx, s.end.dy - tickDy),
+      paint,
+    );
 
     // Distance label
     final dist = (s.end - s.start).distance;
-    final mid = Offset((s.start.dx + s.end.dx) / 2, (s.start.dy + s.end.dy) / 2);
-    _drawText(canvas, Offset(mid.dx, mid.dy - 16), dist.toStringAsFixed(1), paint.color, 11, FontStyle.normal, FontWeight.w500);
+    final mid = Offset(
+      (s.start.dx + s.end.dx) / 2,
+      (s.start.dy + s.end.dy) / 2,
+    );
+    _drawText(
+      canvas,
+      Offset(mid.dx, mid.dy - 16),
+      dist.toStringAsFixed(1),
+      paint.color,
+      11,
+      FontStyle.normal,
+      FontWeight.w500,
+    );
   }
 
   void _drawEraserCursor(Canvas canvas) {
@@ -386,36 +481,73 @@ class DrawingPainter extends CustomPainter {
   }
 
   void _drawMeasurementLine(Canvas canvas) {
-    final p = Paint()..color = Colors.blue..strokeWidth = 2.0;
+    final p = Paint()
+      ..color = Colors.blue
+      ..strokeWidth = 2.0;
     canvas.drawLine(measurementStart!, measurementEnd!, p);
     canvas.drawCircle(measurementStart!, 4, p);
     canvas.drawCircle(measurementEnd!, 4, p);
   }
 
-  void _drawText(Canvas canvas, Offset pos, String text, Color color, double fontSize, FontStyle fontStyle, FontWeight fontWeight) {
+  void _drawText(
+    Canvas canvas,
+    Offset pos,
+    String text,
+    Color color,
+    double fontSize,
+    FontStyle fontStyle,
+    FontWeight fontWeight,
+  ) {
     final tp = TextPainter(
-      text: TextSpan(text: text, style: TextStyle(color: color, fontSize: fontSize, fontStyle: fontStyle, fontWeight: fontWeight)),
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          color: color,
+          fontSize: fontSize,
+          fontStyle: fontStyle,
+          fontWeight: fontWeight,
+        ),
+      ),
       textDirection: TextDirection.ltr,
     )..layout();
     tp.paint(canvas, pos);
   }
 
   void _drawSelectionIndicator(Canvas canvas, DrawnShape s) {
-    final strokePaint = Paint()..color = Colors.blue..strokeWidth = 1.5..style = PaintingStyle.stroke;
-    final glowPaint = Paint()..color = Colors.blue.withValues(alpha: 0.2)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4)..style = PaintingStyle.stroke..strokeWidth = 3;
-    final hPaint = Paint()..color = Colors.blue..style = PaintingStyle.fill;
+    final strokePaint = Paint()
+      ..color = Colors.blue
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+    final glowPaint = Paint()
+      ..color = Colors.blue.withValues(alpha: 0.2)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3;
+    final hPaint = Paint()
+      ..color = Colors.blue
+      ..style = PaintingStyle.fill;
 
     Rect bounds;
-    if (s.type == ShapeType.freehand && s.pathPoints != null && s.pathPoints!.isNotEmpty) {
+    if (s.type == ShapeType.freehand &&
+        s.pathPoints != null &&
+        s.pathPoints!.isNotEmpty) {
       bounds = s.bounds;
     } else if (s.type == ShapeType.text) {
       double minX = double.infinity, minY = double.infinity;
       double maxX = double.negativeInfinity, maxY = double.negativeInfinity;
       s.texts.forEach((key, label) {
         final pos = s.textPositions[key] ?? s.start;
-        final tp = TextPainter(text: TextSpan(text: label, style: TextStyle(fontSize: s.fontSize)), textDirection: ui.TextDirection.ltr)..layout();
-        minX = math.min(minX, pos.dx); minY = math.min(minY, pos.dy);
-        maxX = math.max(maxX, pos.dx + tp.width); maxY = math.max(maxY, pos.dy + tp.height);
+        final tp = TextPainter(
+          text: TextSpan(
+            text: label,
+            style: TextStyle(fontSize: s.fontSize),
+          ),
+          textDirection: ui.TextDirection.ltr,
+        )..layout();
+        minX = math.min(minX, pos.dx);
+        minY = math.min(minY, pos.dy);
+        maxX = math.max(maxX, pos.dx + tp.width);
+        maxY = math.max(maxY, pos.dy + tp.height);
       });
       bounds = Rect.fromLTRB(minX, minY, maxX, maxY);
     } else {
@@ -433,20 +565,31 @@ class DrawingPainter extends CustomPainter {
       canvas.rotate(s.rotation);
       canvas.translate(-boundsCenter.dx, -boundsCenter.dy);
 
-      final lockStrokePaint = Paint()..color = Colors.red..strokeWidth = 1.5..style = PaintingStyle.stroke;
-      final lockGlowPaint = Paint()..color = Colors.red.withValues(alpha: 0.2)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4)..style = PaintingStyle.stroke..strokeWidth = 3;
+      final lockStrokePaint = Paint()
+        ..color = Colors.red
+        ..strokeWidth = 1.5
+        ..style = PaintingStyle.stroke;
+      final lockGlowPaint = Paint()
+        ..color = Colors.red.withValues(alpha: 0.2)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3;
 
       canvas.drawPath(dashed, lockGlowPaint);
       canvas.drawPath(dashed, lockStrokePaint);
 
-      _drawIconOnCanvas(canvas, boundsCenter, Bootstrap.lock, 22, Colors.red);
+      _drawIconOnCanvas(canvas, boundsCenter, Icons.lock, 22, Colors.red);
 
       canvas.restore();
       return;
     }
 
-    if (s.type == ShapeType.warp && s.pathPoints != null && s.pathPoints!.length >= 8 && interactionMode == InteractionMode.warp) {
-      final borderPath = Path()..moveTo(s.pathPoints![0].dx, s.pathPoints![0].dy);
+    if (s.type == ShapeType.warp &&
+        s.pathPoints != null &&
+        s.pathPoints!.length >= 8 &&
+        interactionMode == InteractionMode.warp) {
+      final borderPath = Path()
+        ..moveTo(s.pathPoints![0].dx, s.pathPoints![0].dy);
       for (int i = 1; i < 8; i++) {
         borderPath.lineTo(s.pathPoints![i].dx, s.pathPoints![i].dy);
       }
@@ -458,12 +601,18 @@ class DrawingPainter extends CustomPainter {
       for (int i = 0; i < 8; i++) {
         canvas.drawCircle(s.pathPoints![i], handleRadius, hPaint);
       }
-      _drawIconOnCanvas(canvas, boundsCenter, Bootstrap.arrows_move, 22, Colors.blue);
+      _drawIconOnCanvas(canvas, boundsCenter, Icons.open_with, 22, Colors.blue);
 
       if (s.texts.isNotEmpty) {
         s.texts.forEach((key, _) {
           final pos = s.textPositions[key] ?? s.start;
-          canvas.drawLine(boundsCenter, pos, Paint()..color = Colors.blue.withValues(alpha: 0.5)..strokeWidth = 1.5);
+          canvas.drawLine(
+            boundsCenter,
+            pos,
+            Paint()
+              ..color = Colors.blue.withValues(alpha: 0.5)
+              ..strokeWidth = 1.5,
+          );
           canvas.drawCircle(pos, handleRadius, hPaint);
         });
       }
@@ -481,28 +630,53 @@ class DrawingPainter extends CustomPainter {
     canvas.drawPath(dashed, glowPaint);
     canvas.drawPath(dashed, strokePaint);
 
-    for (final corner in [scaled.topLeft, scaled.topRight, scaled.bottomLeft, scaled.bottomRight]) {
+    for (final corner in [
+      scaled.topLeft,
+      scaled.topRight,
+      scaled.bottomLeft,
+      scaled.bottomRight,
+    ]) {
       canvas.drawCircle(corner, handleRadius, hPaint);
       if (corner == scaled.bottomRight || corner == scaled.bottomLeft) {
-        _drawIconOnCanvas(canvas, corner, Bootstrap.arrows_angle_expand, 10, Colors.white);
+        _drawIconOnCanvas(canvas, corner, Icons.open_in_full, 10, Colors.white);
       }
     }
-    _drawIconOnCanvas(canvas, boundsCenter, Bootstrap.arrows_move, 22, Colors.blue);
+    _drawIconOnCanvas(canvas, boundsCenter, Icons.open_with, 22, Colors.blue);
 
     canvas.restore();
 
     if (s.texts.isNotEmpty && s.type != ShapeType.text) {
       s.texts.forEach((key, _) {
         final pos = s.textPositions[key] ?? s.start;
-        canvas.drawLine(boundsCenter, pos, Paint()..color = Colors.blue.withValues(alpha: 0.5)..strokeWidth = 1.5);
+        canvas.drawLine(
+          boundsCenter,
+          pos,
+          Paint()
+            ..color = Colors.blue.withValues(alpha: 0.5)
+            ..strokeWidth = 1.5,
+        );
         canvas.drawCircle(pos, handleRadius, hPaint);
       });
     }
   }
 
-  void _drawIconOnCanvas(Canvas canvas, Offset center, IconData icon, double size, Color color) {
+  void _drawIconOnCanvas(
+    Canvas canvas,
+    Offset center,
+    IconData icon,
+    double size,
+    Color color,
+  ) {
     final tp = TextPainter(
-      text: TextSpan(text: String.fromCharCode(icon.codePoint), style: TextStyle(fontSize: size, fontFamily: icon.fontFamily, package: icon.fontPackage, color: color)),
+      text: TextSpan(
+        text: String.fromCharCode(icon.codePoint),
+        style: TextStyle(
+          fontSize: size,
+          fontFamily: icon.fontFamily,
+          package: icon.fontPackage,
+          color: color,
+        ),
+      ),
       textDirection: TextDirection.ltr,
     )..layout();
     tp.paint(canvas, center - Offset(tp.width / 2, tp.height / 2));
@@ -510,10 +684,22 @@ class DrawingPainter extends CustomPainter {
 
   Path _createDashedRect(Rect rect, double dashW, double dashS) {
     final p = Path();
-    p.addPath(_addDashedLine(rect.topLeft, rect.topRight, dashW, dashS), Offset.zero);
-    p.addPath(_addDashedLine(rect.topRight, rect.bottomRight, dashW, dashS), Offset.zero);
-    p.addPath(_addDashedLine(rect.bottomRight, rect.bottomLeft, dashW, dashS), Offset.zero);
-    p.addPath(_addDashedLine(rect.bottomLeft, rect.topLeft, dashW, dashS), Offset.zero);
+    p.addPath(
+      _addDashedLine(rect.topLeft, rect.topRight, dashW, dashS),
+      Offset.zero,
+    );
+    p.addPath(
+      _addDashedLine(rect.topRight, rect.bottomRight, dashW, dashS),
+      Offset.zero,
+    );
+    p.addPath(
+      _addDashedLine(rect.bottomRight, rect.bottomLeft, dashW, dashS),
+      Offset.zero,
+    );
+    p.addPath(
+      _addDashedLine(rect.bottomLeft, rect.topLeft, dashW, dashS),
+      Offset.zero,
+    );
     return p;
   }
 
@@ -521,7 +707,10 @@ class DrawingPainter extends CustomPainter {
     final path = Path();
     final totalLen = (end - start).distance;
     if (totalLen == 0) return path;
-    final dir = Offset((end.dx - start.dx) / totalLen, (end.dy - start.dy) / totalLen);
+    final dir = Offset(
+      (end.dx - start.dx) / totalLen,
+      (end.dy - start.dy) / totalLen,
+    );
     double d = 0.0;
     while (d < totalLen) {
       final from = Offset(start.dx + dir.dx * d, start.dy + dir.dy * d);
@@ -547,13 +736,17 @@ class DrawingPainter extends CustomPainter {
 
     // Fill (subtle)
     final fillPaint = Paint()
-      ..color = const Color(0xFFE040FB).withValues(alpha: isMagnetActive ? 0.08 : 0.04)
+      ..color = const Color(
+        0xFFE040FB,
+      ).withValues(alpha: isMagnetActive ? 0.08 : 0.04)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(magnetPosition!, magnetRadius, fillPaint);
 
     // Border ring
     final borderPaint = Paint()
-      ..color = const Color(0xFFE040FB).withValues(alpha: isMagnetActive ? 0.7 : 0.35)
+      ..color = const Color(
+        0xFFE040FB,
+      ).withValues(alpha: isMagnetActive ? 0.7 : 0.35)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
     canvas.drawCircle(magnetPosition!, magnetRadius, borderPaint);
@@ -597,6 +790,11 @@ class DrawingPainter extends CustomPainter {
       ..lineTo(center.dx, center.dy + size)
       ..lineTo(center.dx - size, center.dy)
       ..close();
-    canvas.drawPath(path, Paint()..color = const Color(0xFFE040FB).withValues(alpha: 0.8)..style = PaintingStyle.fill);
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = const Color(0xFFE040FB).withValues(alpha: 0.8)
+        ..style = PaintingStyle.fill,
+    );
   }
 }
